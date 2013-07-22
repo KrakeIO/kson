@@ -187,6 +187,7 @@ if (typeof KSON !== 'object') {
 
         String.prototype.toKSON      =
             Number.prototype.toKSON  =
+            RegExp.prototype.toKSON  =
             Boolean.prototype.toKSON = function () {
                 return this.valueOf();
             };
@@ -282,6 +283,12 @@ if (typeof KSON !== 'object') {
 
             if (!value) {
                 return 'null';
+            }
+
+//Is the value a regular expression?
+
+            if (Object.prototype.toString.apply(value) === '[object RegExp]') {
+              return String(value)
             }
 
 // Make an array to hold the partial results of stringifying this object value.
@@ -460,7 +467,7 @@ if (typeof KSON !== 'object') {
 
             if (/^[\],:{}\s]*$/
                     .test(text.replace(/\\(?:["\\\/bfnrt]|u[0-9a-fA-F]{4})/g, '@')
-                        .replace(/"[^"\\\n\r]*"|true|false|null|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?/g, ']')
+                        .replace(/"[^"\\\n\r]*"|\/[^\/\\\n\r]*\/|true|false|null|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?/g, ']')
                         .replace(/(?:^|:|,)(?:\s*\[)+/g, ''))) {
 
 // In the third stage we use the eval function to compile the text into a
