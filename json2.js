@@ -16,10 +16,10 @@
     NOT CONTROL.
 
 
-    This file creates a global JSON object containing two methods: stringify
+    This file creates a global KSON object containing two methods: stringify
     and parse.
 
-        JSON.stringify(value, replacer, space)
+        KSON.stringify(value, replacer, space)
             value       any JavaScript value, usually an object or array.
 
             replacer    an optional parameter that determines how object
@@ -33,19 +33,19 @@
                         level. If it is a string (such as '\t' or '&nbsp;'),
                         it contains the characters used to indent at each level.
 
-            This method produces a JSON text from a JavaScript value.
+            This method produces a KSON text from a JavaScript value.
 
-            When an object value is found, if the object contains a toJSON
-            method, its toJSON method will be called and the result will be
-            stringified. A toJSON method does not serialize: it returns the
+            When an object value is found, if the object contains a toKSON
+            method, its toKSON method will be called and the result will be
+            stringified. A toKSON method does not serialize: it returns the
             value represented by the name/value pair that should be serialized,
-            or undefined if nothing should be serialized. The toJSON method
+            or undefined if nothing should be serialized. The toKSON method
             will be passed the key associated with the value, and this will be
             bound to the value
 
             For example, this would serialize Dates as ISO strings.
 
-                Date.prototype.toJSON = function (key) {
+                Date.prototype.toKSON = function (key) {
                     function f(n) {
                         // Format integers to have at least two digits.
                         return n < 10 ? '0' + n : n;
@@ -70,11 +70,11 @@
             such that only members with keys listed in the replacer array are
             stringified.
 
-            Values that do not have JSON representations, such as undefined or
+            Values that do not have KSON representations, such as undefined or
             functions, will not be serialized. Such values in objects will be
             dropped; in arrays they will be replaced with null. You can use
-            a replacer function to replace those with JSON values.
-            JSON.stringify(undefined) returns undefined.
+            a replacer function to replace those with KSON values.
+            KSON.stringify(undefined) returns undefined.
 
             The optional space parameter produces a stringification of the
             value that is filled with line breaks and indentation to make it
@@ -86,22 +86,22 @@
 
             Example:
 
-            text = JSON.stringify(['e', {pluribus: 'unum'}]);
+            text = KSON.stringify(['e', {pluribus: 'unum'}]);
             // text is '["e",{"pluribus":"unum"}]'
 
 
-            text = JSON.stringify(['e', {pluribus: 'unum'}], null, '\t');
+            text = KSON.stringify(['e', {pluribus: 'unum'}], null, '\t');
             // text is '[\n\t"e",\n\t{\n\t\t"pluribus": "unum"\n\t}\n]'
 
-            text = JSON.stringify([new Date()], function (key, value) {
+            text = KSON.stringify([new Date()], function (key, value) {
                 return this[key] instanceof Date ?
                     'Date(' + this[key] + ')' : value;
             });
             // text is '["Date(---current time---)"]'
 
 
-        JSON.parse(text, reviver)
-            This method parses a JSON text to produce an object or array.
+        KSON.parse(text, reviver)
+            This method parses a KSON text to produce an object or array.
             It can throw a SyntaxError exception.
 
             The optional reviver parameter is a function that can filter and
@@ -115,7 +115,7 @@
             // Parse the text. Values that look like ISO date strings will
             // be converted to Date objects.
 
-            myData = JSON.parse(text, function (key, value) {
+            myData = KSON.parse(text, function (key, value) {
                 var a;
                 if (typeof value === 'string') {
                     a =
@@ -128,7 +128,7 @@
                 return value;
             });
 
-            myData = JSON.parse('["Date(09/09/2001)"]', function (key, value) {
+            myData = KSON.parse('["Date(09/09/2001)"]', function (key, value) {
                 var d;
                 if (typeof value === 'string' &&
                         value.slice(0, 5) === 'Date(' &&
@@ -148,19 +148,19 @@
 
 /*jslint evil: true, regexp: true */
 
-/*members "", "\b", "\t", "\n", "\f", "\r", "\"", JSON, "\\", apply,
+/*members "", "\b", "\t", "\n", "\f", "\r", "\"", KSON, "\\", apply,
     call, charCodeAt, getUTCDate, getUTCFullYear, getUTCHours,
     getUTCMinutes, getUTCMonth, getUTCSeconds, hasOwnProperty, join,
     lastIndex, length, parse, prototype, push, replace, slice, stringify,
-    test, toJSON, toString, valueOf
+    test, toKSON, toString, valueOf
 */
 
 
-// Create a JSON object only if one does not already exist. We create the
+// Create a KSON object only if one does not already exist. We create the
 // methods in a closure to avoid creating global variables.
 
-if (typeof JSON !== 'object') {
-    JSON = {};
+if (typeof KSON !== 'object') {
+    KSON = {};
 }
 
 (function () {
@@ -171,9 +171,9 @@ if (typeof JSON !== 'object') {
         return n < 10 ? '0' + n : n;
     }
 
-    if (typeof Date.prototype.toJSON !== 'function') {
+    if (typeof Date.prototype.toKSON !== 'function') {
 
-        Date.prototype.toJSON = function () {
+        Date.prototype.toKSON = function () {
 
             return isFinite(this.valueOf())
                 ? this.getUTCFullYear()     + '-' +
@@ -185,9 +185,9 @@ if (typeof JSON !== 'object') {
                 : null;
         };
 
-        String.prototype.toJSON      =
-            Number.prototype.toJSON  =
-            Boolean.prototype.toJSON = function () {
+        String.prototype.toKSON      =
+            Number.prototype.toKSON  =
+            Boolean.prototype.toKSON = function () {
                 return this.valueOf();
             };
     }
@@ -237,11 +237,11 @@ if (typeof JSON !== 'object') {
             partial,
             value = holder[key];
 
-// If the value has a toJSON method, call it to obtain a replacement value.
+// If the value has a toKSON method, call it to obtain a replacement value.
 
         if (value && typeof value === 'object' &&
-                typeof value.toJSON === 'function') {
-            value = value.toJSON(key);
+                typeof value.toKSON === 'function') {
+            value = value.toKSON(key);
         }
 
 // If we were called with a replacer function, then call the replacer to
@@ -259,7 +259,7 @@ if (typeof JSON !== 'object') {
 
         case 'number':
 
-// JSON numbers must be finite. Encode non-finite numbers as null.
+// KSON numbers must be finite. Encode non-finite numbers as null.
 
             return isFinite(value) ? String(value) : 'null';
 
@@ -294,7 +294,7 @@ if (typeof JSON !== 'object') {
             if (Object.prototype.toString.apply(value) === '[object Array]') {
 
 // The value is an array. Stringify every element. Use null as a placeholder
-// for non-JSON values.
+// for non-KSON values.
 
                 length = value.length;
                 for (i = 0; i < length; i += 1) {
@@ -353,13 +353,13 @@ if (typeof JSON !== 'object') {
         }
     }
 
-// If the JSON object does not yet have a stringify method, give it one.
+// If the KSON object does not yet have a stringify method, give it one.
 
-    if (typeof JSON.stringify !== 'function') {
-        JSON.stringify = function (value, replacer, space) {
+    if (typeof KSON.stringify !== 'function') {
+        KSON.stringify = function (value, replacer, space) {
 
 // The stringify method takes a value and an optional replacer, and an optional
-// space parameter, and returns a JSON text. The replacer can be a function
+// space parameter, and returns a KSON text. The replacer can be a function
 // that can replace values, or an array of strings that will select the keys.
 // A default replacer method can be provided. Use of the space parameter can
 // produce text that is more easily readable.
@@ -389,7 +389,7 @@ if (typeof JSON !== 'object') {
             if (replacer && typeof replacer !== 'function' &&
                     (typeof replacer !== 'object' ||
                     typeof replacer.length !== 'number')) {
-                throw new Error('JSON.stringify');
+                throw new Error('KSON.stringify');
             }
 
 // Make a fake root object containing our value under the key of ''.
@@ -400,13 +400,13 @@ if (typeof JSON !== 'object') {
     }
 
 
-// If the JSON object does not yet have a parse method, give it one.
+// If the KSON object does not yet have a parse method, give it one.
 
-    if (typeof JSON.parse !== 'function') {
-        JSON.parse = function (text, reviver) {
+    if (typeof KSON.parse !== 'function') {
+        KSON.parse = function (text, reviver) {
 
 // The parse method takes a text and an optional reviver function, and returns
-// a JavaScript value if the text is a valid JSON text.
+// a JavaScript value if the text is a valid KSON text.
 
             var j;
 
@@ -446,13 +446,13 @@ if (typeof JSON !== 'object') {
             }
 
 // In the second stage, we run the text against regular expressions that look
-// for non-JSON patterns. We are especially concerned with '()' and 'new'
+// for non-KSON patterns. We are especially concerned with '()' and 'new'
 // because they can cause invocation, and '=' because it can cause mutation.
 // But just to be safe, we want to reject all unexpected forms.
 
 // We split the second stage into 4 regexp operations in order to work around
 // crippling inefficiencies in IE's and Safari's regexp engines. First we
-// replace the JSON backslash pairs with '@' (a non-JSON character). Second, we
+// replace the KSON backslash pairs with '@' (a non-KSON character). Second, we
 // replace all simple value tokens with ']' characters. Third, we delete all
 // open brackets that follow a colon or comma or that begin the text. Finally,
 // we look to see that the remaining characters are only whitespace or ']' or
@@ -478,9 +478,9 @@ if (typeof JSON !== 'object') {
                     : j;
             }
 
-// If the text is not JSON parseable, then a SyntaxError is thrown.
+// If the text is not KSON parseable, then a SyntaxError is thrown.
 
-            throw new SyntaxError('JSON.parse');
+            throw new SyntaxError('KSON.parse');
         };
     }
 }());
